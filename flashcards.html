@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بطاقاتي - فلاش كاردز</title>
+<style>
+  :root{
+    --bg:#070506; --surface:#120C0F; --ink:#F3E9EC; --muted:#A8949B; --line:#2B1920;
+    --accent:#9B1C3A; --accent-ink:#FFFFFF; --burg-deep:#4A1020; --burg-line:#7A2438;
+    --ok:#4FC79B; --warn:#E3B04B; --focus:#E58AA0;
+    --soft:#1A1014;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI",Tahoma,"Noto Sans Arabic",system-ui,-apple-system,sans-serif;
+    line-height:1.6; font-size:16px;
+  }
+  #app{max-width:640px; margin:0 auto; padding:20px 16px 60px}
+  h1{font-size:28px; margin:8px 0 4px; font-weight:800}
+  h2{font-size:20px; margin:0; font-weight:700}
+  .sub{color:var(--muted); margin:0 0 20px}
+  button,input,textarea{font:inherit; color:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:3px solid var(--focus); outline-offset:2px}
+  .btn{
+    background:var(--burg-deep); color:var(--ink); border:1.5px solid var(--burg-line); border-radius:10px;
+    padding:10px 16px; font-weight:700;
+  }
+  .btn.accent{background:var(--accent); color:var(--accent-ink)}
+  .btn.ghost{background:transparent; color:var(--ink); border:1.5px solid var(--line)}
+  .btn.small{padding:6px 10px; font-size:14px; border-radius:8px}
+  .btn[disabled]{opacity:.45; cursor:not-allowed}
+  .row{display:flex; gap:8px; align-items:stretch; flex-wrap:wrap}
+  input[type=text], textarea{
+    width:100%; background:var(--surface); border:1.5px solid var(--line);
+    border-radius:10px; padding:10px 12px;
+  }
+  textarea{min-height:76px; resize:vertical}
+  .row input[type=text]{flex:1; min-width:0}
+  .deck{
+    background:var(--surface); border:1.5px solid var(--line); border-radius:12px;
+    padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px;
+    cursor:pointer; width:100%; text-align:start;
+  }
+  .deck:hover{border-color:var(--ink)}
+  .deck .name{flex:1; font-weight:700; font-size:17px}
+  .deck .meta{color:var(--muted); font-size:14px}
+  .badge{background:var(--accent); color:var(--accent-ink); border-radius:999px; padding:2px 10px; font-size:13px; font-weight:700}
+  .badge.none{background:var(--soft); color:var(--muted)}
+  .top{display:flex; align-items:center; gap:10px; margin-bottom:16px}
+  .top .grow{flex:1}
+  .section{margin:22px 0 8px; font-weight:700; color:var(--muted); font-size:15px}
+  .panel{background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px}
+  .panel .field{margin-bottom:10px}
+  .item{
+    background:var(--surface); border:1.5px solid var(--line); border-radius:12px;
+    padding:12px 14px; margin-bottom:8px;
+  }
+  .item .q{font-weight:700}
+  .item .a{color:var(--muted); margin-top:2px}
+  .item .tools{display:flex; gap:6px; margin-top:8px}
+  .box-tag{font-size:12px; color:var(--muted); margin-inline-start:auto}
+  details{margin-bottom:12px}
+  summary{cursor:pointer; font-weight:700; padding:6px 0}
+  .empty{color:var(--muted); text-align:center; padding:28px 12px; border:1.5px dashed var(--line); border-radius:12px}
+
+  /* study */
+  .progress{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin:6px 0 18px}
+  .progress > i{display:block; height:100%; background:var(--ok); transition:width .25s}
+  .card{
+    background:var(--surface); border:1.5px solid var(--line); border-top:5px solid var(--accent);
+    border-radius:6px 6px 14px 14px; padding:26px 22px; min-height:260px;
+    display:flex; flex-direction:column; justify-content:center; gap:18px;
+    background-image:repeating-linear-gradient(transparent 0 35px, color-mix(in srgb, var(--line) 55%, transparent) 35px 36px);
+    cursor:pointer;
+  }
+  .card .qtext{font-size:22px; font-weight:700; line-height:1.55; white-space:pre-wrap}
+  .card .atext{font-size:19px; line-height:1.6; white-space:pre-wrap; padding-top:16px; border-top:2px solid var(--accent)}
+  .card .hint{color:var(--muted); font-size:14px; text-align:center}
+  .rates{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:14px}
+  .rate{
+    background:var(--surface); border:1.5px solid var(--line); border-bottom-width:4px;
+    border-radius:10px; padding:10px 4px; text-align:center; font-weight:700;
+  }
+  .rate small{display:block; font-weight:400; color:var(--muted); font-size:12px}
+  .rate.r0{border-bottom-color:var(--accent)}
+  .rate.r1{border-bottom-color:var(--warn)}
+  .rate.r2{border-bottom-color:var(--ok)}
+  .rate.r3{border-bottom-color:var(--focus)}
+  .summary-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:16px 0}
+  .stat{background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:12px; text-align:center}
+  .stat b{font-size:26px; display:block}
+  .toast{color:var(--ok); font-weight:700; margin:6px 0}
+  @media (max-width:420px){ .rate{font-size:14px} .card .qtext{font-size:20px} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const KEY = 'flashcards-v1';
+const DAYS = [0, 1, 3, 7, 14, 30, 60];
+const DAY_MS = 86400000;
+let S = { decks: [], seeded: false };
+let view = { name: 'home' };
+let msg = '';
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = id => document.getElementById(id);
+const isDue = c => c.due <= Date.now();
+
+function save(){
+  const s = JSON.stringify(S);
+  try{
+    if (window.storage && window.storage.set){
+      window.storage.set(KEY, s, false).catch(()=>{});
+      return;
+    }
+  }catch(e){}
+  try{ localStorage.setItem(KEY, s); }catch(e){}
+}
+
+const SAMPLES = [
+  { name: 'مثال: Medicine سريع', first: true, rows: [
+    ['Which nerve is injured in wrist drop?', 'Radial nerve'],
+    ['Antidote for paracetamol overdose?', 'N-acetylcysteine'],
+    ['Most common cause of community-acquired pneumonia?', 'Streptococcus pneumoniae'],
+    ['Components of Cushing reflex?', 'Hypertension, bradycardia, and irregular respiration (raised ICP)'],
+    ['First-line drug in anaphylaxis?', 'Intramuscular adrenaline (epinephrine)'],
+    ['Deficiency that causes scurvy?', 'Vitamin C'],
+    ['Reed-Sternberg cells are characteristic of?', 'Hodgkin lymphoma'],
+    ['Murmur of mitral stenosis?', 'Mid-diastolic rumbling murmur with an opening snap']
+  ]},
+  { name: 'Anatomy', rows: [
+    ['Nerve supply of the deltoid?', 'Axillary nerve (C5-C6)'],
+    ['Nerve passing through the carpal tunnel?', 'Median nerve'],
+    ['Muscle that initiates abduction of the arm (first 15 degrees)?', 'Supraspinatus'],
+    ['Artery most commonly torn in epidural hematoma?', 'Middle meningeal artery'],
+    ['Cranial nerve supplying the lateral rectus?', 'Abducens nerve (CN VI)'],
+    ['Nerve at risk in fracture of the surgical neck of the humerus?', 'Axillary nerve'],
+    ['Root value of the knee jerk reflex?', 'L3-L4'],
+    ['Which structure continues as the spinal cord at the foramen magnum?', 'Medulla oblongata']
+  ]},
+  { name: 'Physiology', rows: [
+    ['Cardiac output formula?', 'CO = Heart rate x Stroke volume'],
+    ['Hormone that raises blood calcium?', 'Parathyroid hormone (PTH)'],
+    ['Cells that secrete intrinsic factor?', 'Parietal cells of the stomach'],
+    ['Where is ADH made and where is it released from?', 'Made in the hypothalamus (supraoptic and paraventricular nuclei), released from the posterior pituitary'],
+    ['Normal arterial blood pH range?', '7.35 - 7.45'],
+    ['Ion that triggers neurotransmitter release at the nerve terminal?', 'Calcium (Ca2+)'],
+    ['Normal GFR in a healthy adult?', 'Roughly 90 - 120 mL/min/1.73 m2'],
+    ['Main site of nutrient and water absorption in the GI tract?', 'Small intestine']
+  ]},
+  { name: 'Pharmacology', rows: [
+    ['Antidote for warfarin?', 'Vitamin K (plus FFP or PCC if severe bleeding)'],
+    ['Antidote for heparin?', 'Protamine sulfate'],
+    ['Antidote for opioid overdose?', 'Naloxone'],
+    ['Antidote for benzodiazepine overdose?', 'Flumazenil'],
+    ['Treatment of organophosphate poisoning?', 'Atropine and pralidoxime'],
+    ['Class of drugs ending in -pril and their classic side effect?', 'ACE inhibitors; dry cough (also angioedema, hyperkalemia)'],
+    ['First-line drug class in status epilepticus?', 'IV benzodiazepine (lorazepam or diazepam)'],
+    ['Mechanism of action of aspirin?', 'Irreversible inhibition of COX, decreasing thromboxane A2'],
+    ['Beta-blockers should be avoided in?', 'Asthma, and also severe bradycardia or heart block']
+  ]},
+  { name: 'Pathology', rows: [
+    ["Virchow's triad?", 'Stasis, endothelial injury, hypercoagulability'],
+    ['Most common type of thyroid cancer?', 'Papillary carcinoma'],
+    ['Type of necrosis in tuberculosis?', 'Caseous necrosis'],
+    ['Philadelphia chromosome t(9;22) is associated with?', 'Chronic myeloid leukemia (BCR-ABL)'],
+    ['Auer rods are seen in?', 'Acute myeloid leukemia'],
+    ['Type of necrosis typical of brain infarction?', 'Liquefactive necrosis'],
+    ['Most common primary malignant tumor of the liver?', 'Hepatocellular carcinoma'],
+    ['Most common causes of acute pancreatitis?', 'Gallstones and alcohol']
+  ]},
+  { name: 'Microbiology', rows: [
+    ['Most common cause of UTI?', 'Escherichia coli'],
+    ['Gram-positive cocci in clusters, catalase +, coagulase +?', 'Staphylococcus aureus'],
+    ['Organism causing pseudomembranous colitis?', 'Clostridioides difficile'],
+    ['Causative agent of syphilis?', 'Treponema pallidum'],
+    ['Vector of malaria?', 'Female Anopheles mosquito'],
+    ['Stain used to identify Mycobacterium tuberculosis?', 'Ziehl-Neelsen (acid-fast) stain'],
+    ['Which hepatitis virus is a DNA virus?', 'Hepatitis B'],
+    ['Intermediate host of Schistosoma mansoni?', 'Biomphalaria snail'],
+    ['Intermediate host of Schistosoma haematobium?', 'Bulinus snail']
+  ]}
+];
+
+function addSamples(){
+  if ((S.seedV || 0) >= 2) return;
+  const hadSeed = S.seeded;
+  SAMPLES.forEach(s => {
+    if (s.first && hadSeed) return;
+    if (S.decks.some(d => d.name === s.name)) return;
+    S.decks.push({ id: uid(), name: s.name, cards: s.rows.map(r => ({ id: uid(), q: r[0], a: r[1], box: 0, due: 0 })) });
+  });
+  S.seeded = true; S.seedV = 2;
+  save();
+}
+
+async function init(){
+  let raw = null;
+  try{
+    if (window.storage && window.storage.get){
+      const r = await window.storage.get(KEY, false);
+      raw = r && r.value;
+    } else {
+      raw = localStorage.getItem(KEY);
+    }
+  }catch(e){}
+  if (raw){ try{ S = JSON.parse(raw); }catch(e){} }
+  addSamples();
+  render();
+}
+
+function findDeck(id){ return S.decks.find(d => d.id === id); }
+function findCard(id){
+  for (const d of S.decks){ const c = d.cards.find(x => x.id === id); if (c) return c; }
+  return null;
+}
+function counts(d){ return { n: d.cards.length, m: d.cards.filter(isDue).length }; }
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ---------- actions ---------- */
+function go(v){ view = v; msg = ''; render(); window.scrollTo(0,0); }
+function addDeck(){
+  const name = $('nd').value.trim();
+  if (!name) { $('nd').focus(); return; }
+  const d = { id: uid(), name, cards: [] };
+  S.decks.push(d); save();
+  go({ name: 'deck', id: d.id });
+}
+function addOrSaveCard(){
+  const d = findDeck(view.id);
+  const q = $('cq').value.trim(), a = $('ca').value.trim();
+  if (!q || !a){ msg = 'اكتب السؤال والإجابة الأول.'; render(); return; }
+  if (view.editId){
+    const c = findCard(view.editId); c.q = q; c.a = a;
+    view.editId = null; msg = 'تم حفظ التعديل.';
+  } else {
+    d.cards.push({ id: uid(), q, a, box: 0, due: 0 });
+    msg = 'تمت إضافة البطاقة.';
+  }
+  save(); render(); $('cq').focus();
+}
+function editCard(id){ view.editId = id; msg = ''; render(); $('cq').focus(); window.scrollTo(0,0); }
+function cancelEdit(){ view.editId = null; render(); }
+function askDeleteCard(id){ view.confirmCard = id; render(); }
+function deleteCard(id){
+  const d = findDeck(view.id);
+  d.cards = d.cards.filter(c => c.id !== id);
+  view.confirmCard = null; if (view.editId === id) view.editId = null;
+  save(); render();
+}
+function askDeleteDeck(){ view.confirmDeck = true; render(); }
+function deleteDeck(){
+  S.decks = S.decks.filter(d => d.id !== view.id); save(); go({ name: 'home' });
+}
+function bulkImport(){
+  const d = findDeck(view.id);
+  const lines = $('bulk').value.split('\n');
+  let n = 0;
+  for (const line of lines){
+    let i = line.indexOf('\t'); if (i < 0) i = line.indexOf('|');
+    if (i < 0) continue;
+    const q = line.slice(0, i).trim(), a = line.slice(i + 1).trim();
+    if (q && a){ d.cards.push({ id: uid(), q, a, box: 0, due: 0 }); n++; }
+  }
+  msg = n ? 'تم استيراد ' + n + ' بطاقة.' : 'مفيش أسطر صالحة. استخدم الشكل: سؤال | إجابة';
+  if (n) save(); render();
+}
+
+/* ---------- study ---------- */
+function startStudy(deckId, all){
+  let cards = [];
+  if (deckId){
+    const d = findDeck(deckId);
+    cards = all ? d.cards : d.cards.filter(isDue);
+  } else {
+    S.decks.forEach(d => cards.push(...d.cards.filter(isDue)));
+  }
+  if (!cards.length) return;
+  const ids = shuffle(cards.map(c => c.id));
+  go({ name: 'study', deckId, queue: ids, total: ids.length, done: 0, revealed: false, stats: [0,0,0,0] });
+}
+function reveal(){ if (view.name !== 'study' || view.revealed || !view.queue.length) return; view.revealed = true; render(); }
+function nextBox(box, r){
+  if (r === 0) return 0;
+  if (r === 1) return Math.max(1, box - 1);
+  if (r === 2) return Math.min(6, box + 1);
+  return Math.min(6, box + 2);
+}
+function whenLabel(box, r){
+  const days = DAYS[nextBox(box, r)];
+  return days === 0 ? 'كمان شوية' : days === 1 ? 'بعد يوم' : 'بعد ' + days + ' يوم';
+}
+function rate(r){
+  if (!view.revealed) return;
+  const c = findCard(view.queue[0]);
+  c.box = nextBox(c.box, r);
+  c.due = r === 0 ? 0 : Date.now() + DAYS[c.box] * DAY_MS;
+  view.queue.shift();
+  if (r === 0) view.queue.push(c.id); else view.done++;
+  view.stats[r]++;
+  view.revealed = false;
+  save(); render();
+}
+
+/* ---------- views ---------- */
+function render(){
+  const app = $('app');
+  if (view.name === 'home') app.innerHTML = homeView();
+  else if (view.name === 'deck') app.innerHTML = deckView();
+  else app.innerHTML = studyView();
+}
+
+function homeView(){
+  const totalDue = S.decks.reduce((s, d) => s + counts(d).m, 0);
+  const decks = S.decks.length ? S.decks.map(d => {
+    const c = counts(d);
+    return `<button class="deck" onclick="go({name:'deck',id:'${d.id}'})">
+      <span class="name" dir="auto">${esc(d.name)}</span>
+      <span class="meta">${c.n} بطاقة</span>
+      <span class="badge ${c.m ? '' : 'none'}">${c.m ? c.m + ' مستحقة' : 'خلصت'}</span>
+    </button>`;
+  }).join('') : `<div class="empty">لسه معندكش مجموعات. اعمل أول مجموعة من تحت.</div>`;
+  return `
+    <h1>بطاقاتي</h1>
+    <p class="sub">البطاقات اللي بتنساها بترجعلك بسرعة، واللي بتحفظها بتتأجل. ذاكر شوية كل يوم.</p>
+    ${totalDue ? `<button class="btn accent" style="width:100%;margin-bottom:18px" onclick="startStudy(null)">ذاكر كل المستحق (${totalDue})</button>` : ''}
+    ${decks}
+    <div class="section">مجموعة جديدة</div>
+    <div class="row">
+      <input type="text" id="nd" dir="auto" placeholder="اسم المجموعة، مثلاً: Pharmacology" onkeydown="if(event.key==='Enter')addDeck()">
+      <button class="btn" onclick="addDeck()">إضافة مجموعة</button>
+    </div>`;
+}
+
+function deckView(){
+  const d = findDeck(view.id);
+  if (!d) { view = { name: 'home' }; return homeView(); }
+  const c = counts(d);
+  const editing = view.editId ? findCard(view.editId) : null;
+  const list = d.cards.length ? d.cards.map(x => `
+    <div class="item">
+      <div class="q" dir="auto">${esc(x.q)}</div>
+      <div class="a" dir="auto">${esc(x.a)}</div>
+      <div class="tools">
+        <button class="btn ghost small" onclick="editCard('${x.id}')">تعديل</button>
+        ${view.confirmCard === x.id
+          ? `<button class="btn accent small" onclick="deleteCard('${x.id}')">أكيد، احذف</button>
+             <button class="btn ghost small" onclick="view.confirmCard=null;render()">لأ</button>`
+          : `<button class="btn ghost small" onclick="askDeleteCard('${x.id}')">حذف</button>`}
+        <span class="box-tag">${isDue(x) ? 'مستحقة' : 'الجاية: ' + new Date(x.due).toLocaleDateString('ar-EG')}</span>
+      </div>
+    </div>`).join('') : `<div class="empty">المجموعة فاضية. أضف أول بطاقة من فوق.</div>`;
+  const exportText = d.cards.map(x => x.q.replace(/\n/g,' ') + ' | ' + x.a.replace(/\n/g,' ')).join('\n');
+  return `
+    <div class="top">
+      <button class="btn ghost small" onclick="go({name:'home'})">رجوع</button>
+      <h2 class="grow" dir="auto">${esc(d.name)}</h2>
+    </div>
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn accent" ${c.m ? '' : 'disabled'} onclick="startStudy('${d.id}', false)">ذاكر المستحق (${c.m})</button>
+      <button class="btn ghost" ${c.n ? '' : 'disabled'} onclick="startStudy('${d.id}', true)">راجع كل البطاقات (${c.n})</button>
+    </div>
+
+    <div class="section">${editing ? 'تعديل البطاقة' : 'بطاقة جديدة'}</div>
+    <div class="panel">
+      <div class="field"><textarea id="cq" dir="auto" placeholder="السؤال">${editing ? esc(editing.q) : ''}</textarea></div>
+      <div class="field"><textarea id="ca" dir="auto" placeholder="الإجابة">${editing ? esc(editing.a) : ''}</textarea></div>
+      <div class="row">
+        <button class="btn" onclick="addOrSaveCard()">${editing ? 'حفظ التعديل' : 'أضف البطاقة'}</button>
+        ${editing ? `<button class="btn ghost" onclick="cancelEdit()">إلغاء</button>` : ''}
+      </div>
+      ${msg ? `<div class="toast" role="status">${esc(msg)}</div>` : ''}
+    </div>
+
+    <details>
+      <summary>استيراد بطاقات كتير مرة واحدة</summary>
+      <div class="panel">
+        <p class="sub" style="margin-bottom:8px">كل سطر بطاقة، بالشكل ده: سؤال | إجابة. (بيشتغل مع النسخ من Excel أو ملف Anki كمان.)</p>
+        <textarea id="bulk" dir="auto" style="min-height:120px" placeholder="What is the antidote for warfarin? | Vitamin K and FFP"></textarea>
+        <div style="margin-top:10px"><button class="btn" onclick="bulkImport()">استورد</button></div>
+      </div>
+    </details>
+    <details>
+      <summary>نسخة احتياطية (نص تقدر تنسخه)</summary>
+      <div class="panel"><textarea readonly dir="auto" style="min-height:120px" onclick="this.select()">${esc(exportText)}</textarea></div>
+    </details>
+
+    <div class="section">البطاقات (${c.n})</div>
+    ${list}
+
+    <div style="margin-top:28px">
+      ${view.confirmDeck
+        ? `<button class="btn accent small" onclick="deleteDeck()">أكيد، احذف المجموعة كلها</button>
+           <button class="btn ghost small" onclick="view.confirmDeck=false;render()">لأ</button>`
+        : `<button class="btn ghost small" onclick="askDeleteDeck()">حذف المجموعة</button>`}
+    </div>`;
+}
+
+function studyView(){
+  const back = view.deckId ? `{name:'deck',id:'${view.deckId}'}` : `{name:'home'}`;
+  if (!view.queue.length){
+    const s = view.stats;
+    return `
+      <h1>خلصت الجلسة</h1>
+      <p class="sub">راجعت ${view.total} بطاقة. اللي نسيتها هتلاقيها بتتكرر تاني قريب.</p>
+      <div class="summary-grid">
+        <div class="stat"><b>${s[0]}</b>نسيتها</div>
+        <div class="stat"><b>${s[1]}</b>صعبة</div>
+        <div class="stat"><b>${s[2]}</b>تمام</div>
+        <div class="stat"><b>${s[3]}</b>سهلة</div>
+      </div>
+      <button class="btn" onclick="go(${back})">رجوع</button>`;
+  }
+  const c = findCard(view.queue[0]);
+  const pct = Math.round(view.done / view.total * 100);
+  return `
+    <div class="top">
+      <button class="btn ghost small" onclick="go(${back})">إنهاء</button>
+      <span class="grow" style="text-align:end;color:var(--muted)">${view.done} من ${view.total}</span>
+    </div>
+    <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    <div class="card" onclick="reveal()" tabindex="0" role="button" aria-label="اضغط لإظهار الإجابة">
+      <div class="qtext" dir="auto">${esc(c.q)}</div>
+      ${view.revealed
+        ? `<div class="atext" dir="auto">${esc(c.a)}</div>`
+        : `<div class="hint">اضغط على البطاقة أو Space لإظهار الإجابة</div>`}
+    </div>
+    ${view.revealed ? `
+    <div class="rates">
+      <button class="rate r0" onclick="rate(0)">نسيتها<small>${whenLabel(c.box,0)}</small></button>
+      <button class="rate r1" onclick="rate(1)">صعبة<small>${whenLabel(c.box,1)}</small></button>
+      <button class="rate r2" onclick="rate(2)">تمام<small>${whenLabel(c.box,2)}</small></button>
+      <button class="rate r3" onclick="rate(3)">سهلة<small>${whenLabel(c.box,3)}</small></button>
+    </div>` : `<button class="btn" style="width:100%;margin-top:14px" onclick="reveal()">أظهر الإجابة</button>`}`;
+}
+
+document.addEventListener('keydown', e => {
+  if (view.name !== 'study') return;
+  const t = e.target.tagName;
+  if (t === 'INPUT' || t === 'TEXTAREA') return;
+  if (e.key === ' ' || e.key === 'Enter'){ if (!view.revealed){ e.preventDefault(); reveal(); } }
+  else if (view.revealed && ['1','2','3','4'].includes(e.key)) rate(Number(e.key) - 1);
+});
+
+init();
+</script>
+</body>
+</html>
